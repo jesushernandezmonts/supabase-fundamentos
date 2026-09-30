@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../lib/supabase";
 
 export default function CreatePage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -37,7 +37,7 @@ export default function CreatePage() {
 
     // 1️⃣ Preparar nombre del archivo
     const fileExt = file.name.split(".").pop();
-    const fileName = `${file.name}-${Date.now()}.${fileExt}`; 
+    const fileName = `${file.name}-${Date.now()}.${fileExt}`;
     const filePath = `images/${fileName}`;
 
     // 2️⃣ Subir al bucket "supagram"
@@ -195,7 +195,7 @@ export default function CreatePage() {
                 </span>
               </label>
             )}
-            
+
             <input
               ref={fileInputRef}
               id="image-upload"
@@ -221,11 +221,10 @@ export default function CreatePage() {
           {/* Mensaje de estado */}
           {message && (
             <div
-              className={`px-4 py-3 rounded-xl text-sm ${
-                message.type === "success"
+              className={`px-4 py-3 rounded-xl text-sm ${message.type === "success"
                   ? "bg-green-500/10 text-green-500 border border-green-500/20"
                   : "bg-red-500/10 text-red-500 border border-red-500/20"
-              }`}
+                }`}
             >
               {message.text}
             </div>
