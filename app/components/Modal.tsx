@@ -1,4 +1,4 @@
-import { HeartIcon } from "lucide-react";
+import { HeartIcon } from "./Hearticon";
 import { Post } from "../mocks/posts";
 import Image from "next/image";
 import { RelativeTime } from "./RelativeTime";
