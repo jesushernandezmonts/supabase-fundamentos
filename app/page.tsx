@@ -2,56 +2,72 @@
 
 import { useEffect, useState } from "react";
 import PostCard from "./components/PostCard";
-import { posts as fallbackPosts, type Post } from "./mocks/posts";
 import { supabase } from "./lib/supabase";
-
+import { Post } from "./types";
 
 export default function Home() {
-  const [posts, setPosts] = useState<Post[]>(fallbackPosts);
-
-  useEffect(() => {
-    async function getPosts() {
-      try {
-        const { data } = await supabase
-          .from("posts")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (data && data.length > 0) {
-          setPosts(data as Post[]);
-          return;
-        }
-      } catch (error) {
-        console.warn("No se pudieron cargar los posts de Supabase, usando fallback local.", error);
-      }
-
-      setPosts(fallbackPosts);
-    }
-
-    getPosts();
-  }, []);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   const handleLike = (postId: number | string) => {
-    setPosts((prevPosts) =>
+    setPosts((prevPosts) =>     
       prevPosts.map((post) =>
         post.id === postId
           ? {
-            ...post,
-            isLiked: !post.isLiked,
-            likes: post.isLiked ? post.likes - 1 : post.likes + 1,
-          }
+              ...post,
+              isLiked: !post.isLiked,
+              likes: post.isLiked ? post.likes - 1 : post.likes + 1,
+            }
           : post
       )
     );
   };
 
+  useEffect(() => {
+    const fetchPosts = async () => {
+      // 1. Obtener posts
+      const { data: postsData, error: postsError } = await supabase
+        .from("posts")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (postsError) {
+        console.error("Error al obtener los posts:", postsError);
+        return;
+      }
+
+      // 2. Obtener IDs únicos de usuarios
+      const userIds = [...new Set(postsData.map((p) => p.user_id))];
+
+      // 3. Buscar profiles de esos usuarios
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("id, username, avatar_url")
+        .in("id", userIds);
+
+      // 4. Crear mapa de profiles por ID
+      const profilesMap = new Map(
+        profileData?.map((p) => [p.id, { username: p.username, avatar_url: p.avatar_url }]) || []
+      );
+
+      // 5. Combinar posts con profiles
+      const postsWithProfiles = postsData.map((post) => ({
+        ...post,
+        profile: profilesMap.get(post.user_id),
+      }));
+
+      setPosts(postsWithProfiles);
+    };
+
+    fetchPosts();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-card-bg border-b border-border">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-center">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Post
+          <h1 className="text-2xl font-bold bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">
+            Supagram
           </h1>
         </div>
       </header>

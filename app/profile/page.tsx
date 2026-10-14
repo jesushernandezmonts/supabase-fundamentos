@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
 interface Profile {
@@ -12,9 +13,16 @@ interface Profile {
 }
 
 export default function ProfilePage() {
+    const router = useRouter();
     const [profile, setProfile] = useState<Profile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push("/auth/login");
+        router.refresh();
+    };
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -131,13 +139,21 @@ export default function ProfilePage() {
                         </h2>
                     </div>
 
-                    {/* Botón editar */}
-                    <Link
-                        href="/profile/edit"
-                        className="px-6 py-2 rounded-xl bg-linear-to-r from-primary to-accent text-white font-semibold hover:opacity-90 transition-opacity"
-                    >
-                        Editar perfil
-                    </Link>
+                    {/* Botones de acción */}
+                    <div className="flex items-center gap-3">
+                        <Link
+                            href="/profile/edit"
+                            className="px-6 py-2 rounded-xl bg-linear-to-r from-primary to-accent text-white font-semibold hover:opacity-90 transition-opacity"
+                        >
+                            Editar perfil
+                        </Link>
+                        <button
+                            onClick={handleLogout}
+                            className="px-4 py-2 rounded-xl border border-red-500/30 text-red-400 font-semibold hover:bg-red-500/10 transition-colors cursor-pointer"
+                        >
+                            Cerrar sesión
+                        </button>
+                    </div>
                 </div>
             </main>
         </div>

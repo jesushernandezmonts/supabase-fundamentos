@@ -42,6 +42,21 @@ function PlusIcon() {
   );
 }
 
+function ProfileIcon({ active }: { active: boolean }) {
+  if (active) {
+    return (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+        <path fillRule="evenodd" d="M18.685 19.097A9.723 9.723 0 0021.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 003.065 7.097A9.716 9.716 0 0012 21.75a9.716 9.716 0 006.685-2.653zm-12.54-1.285A7.486 7.486 0 0112 15a7.486 7.486 0 015.855 2.812A8.224 8.224 0 0112 20.25a8.224 8.224 0 01-5.855-2.438zM15.75 9a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" clipRule="evenodd" />
+      </svg>
+    );
+  }
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  );
+}
+
 export default function BottomNav() {
   const pathname = usePathname();
 
@@ -50,7 +65,7 @@ export default function BottomNav() {
       <div className="max-w-lg mx-auto flex items-center justify-around py-2">
         <Link
           href="/"
-          className={`flex flex-col items-center gap-1 px-4 py-2 transition-colors ${
+          className={`flex flex-col items-center gap-1 px-3 py-2 transition-colors ${
             pathname === "/" ? "text-primary" : "text-foreground/60 hover:text-foreground"
           }`}
         >
@@ -59,20 +74,31 @@ export default function BottomNav() {
         </Link>
 
         <Link
-          href="/post"
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:scale-105 transition-transform"
-        >
-          <PlusIcon />
-        </Link>
-
-        <Link
           href="/rank"
-          className={`flex flex-col items-center gap-1 px-4 py-2 transition-colors ${
+          className={`flex flex-col items-center gap-1 px-3 py-2 transition-colors ${
             pathname === "/rank" ? "text-primary" : "text-foreground/60 hover:text-foreground"
           }`}
         >
           <RankIcon active={pathname === "/rank"} />
           <span className="text-xs font-medium">Rank</span>
+        </Link>
+
+        <Link
+          href="/post"
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:scale-105 transition-transform"
+          aria-label="Crear post"
+        >
+          <PlusIcon />
+        </Link>
+
+        <Link
+          href="/profile"
+          className={`flex flex-col items-center gap-1 px-3 py-2 transition-colors ${
+            pathname.startsWith("/profile") ? "text-primary" : "text-foreground/60 hover:text-foreground"
+          }`}
+        >
+          <ProfileIcon active={pathname.startsWith("/profile")} />
+          <span className="text-xs font-medium">Perfil</span>
         </Link>
       </div>
     </nav>

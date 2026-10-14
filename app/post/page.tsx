@@ -1,16 +1,37 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import Link from "next/link";
 
 export default function CreatePage() {
+  const router = useRouter();
+  const [userId, setUserId] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        setUserId(user.id);
+      }
+      setIsCheckingAuth(false);
+    };
+
+    checkAuth();
+  }, []);
+
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -33,11 +54,16 @@ export default function CreatePage() {
   };
 
   const uploadAndCreatePost = async (file: File) => {
-    const userId = "11111111-1111-1111-1111-111111111111";
+    if(!userId) {
+      throw new Error("No hay usuario autenticado")
+    }
 
-    // 1️⃣ Preparar nombre del archivo
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${file.name}-${Date.now()}.${fileExt}`;
+    // 1️⃣ Preparar nombre del archivo (limpiando espacios y caracteres especiales)
+    const fileExt = file.name.split(".").pop() || "png";
+    const cleanName = file.name
+      .substring(0, file.name.lastIndexOf(".") > 0 ? file.name.lastIndexOf(".") : file.name.length)
+      .replace(/[^a-zA-Z0-9_-]/g, "_");
+    const fileName = `${cleanName}-${Date.now()}.${fileExt}`;
     const filePath = `images/${fileName}`;
 
     // 2️⃣ Subir al bucket "supagram"
@@ -78,7 +104,7 @@ export default function CreatePage() {
       throw postError;
     }
 
-    console.log("🆕 Post creado:", postData);
+    console.log("✨ Post creado:", postData);
 
     return {
       uploadedImageUrl: publicUrl,
@@ -101,13 +127,17 @@ export default function CreatePage() {
       await uploadAndCreatePost(imageFile);
 
       // Éxito
-      setMessage({ type: "success", text: "¡Post creado exitosamente!" });
+      setMessage({ type: "success", text: "¡Post creado exitosamente! Redirigiendo..." });
       setImageFile(null);
       setImagePreview(null);
       setCaption("");
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+      setTimeout(() => {
+        router.push("/");
+        router.refresh();
+      }, 900);
     } catch (error) {
       setMessage({
         type: "error",
@@ -118,12 +148,36 @@ export default function CreatePage() {
     }
   };
 
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground/60">Cargando...</div>
+      </div>
+    );
+  }
+
+    if (!userId) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center">
+          <p className="text-foreground/60 mb-4">Debes iniciar sesión para crear posts</p>
+          <Link
+            href="/auth/login"
+            className="text-primary hover:underline"
+          >
+            Iniciar sesión
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-card-bg border-b border-border">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-center">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="text-xl font-bold bg-linear-to-r from-primary to-accent bg-clip-text text-transparent">
             Crear Post
           </h1>
         </div>
@@ -195,7 +249,7 @@ export default function CreatePage() {
                 </span>
               </label>
             )}
-
+            
             <input
               ref={fileInputRef}
               id="image-upload"
@@ -221,10 +275,11 @@ export default function CreatePage() {
           {/* Mensaje de estado */}
           {message && (
             <div
-              className={`px-4 py-3 rounded-xl text-sm ${message.type === "success"
+              className={`px-4 py-3 rounded-xl text-sm ${
+                message.type === "success"
                   ? "bg-green-500/10 text-green-500 border border-green-500/20"
                   : "bg-red-500/10 text-red-500 border border-red-500/20"
-                }`}
+              }`}
             >
               {message.text}
             </div>
@@ -234,7 +289,7 @@ export default function CreatePage() {
           <button
             type="submit"
             disabled={isLoading || !imageFile}
-            className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-primary to-accent text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 rounded-xl bg-linear-to-r from-primary to-accent text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <>

@@ -1,14 +1,21 @@
-import { HeartIcon } from "./Hearticon";
-import { Post } from "../mocks/posts";
 import Image from "next/image";
-import { RelativeTime } from "./RelativeTime";
- export default function Modal({
+import { getTimeAgo } from "../utils/time";
+import HeartIcon from "./Hearticon";
+import { Post } from "../types";
+
+export default function Modal({
   post,
   onClose,
 }: {
   post: Post;
   onClose: () => void;
 }) {
+
+  const username = post.profile?.username || 'default user';
+  const avatarUrl = post.profile?.avatar_url || "/user.png";
+
+  console.log(avatarUrl)
+  
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
@@ -44,15 +51,15 @@ import { RelativeTime } from "./RelativeTime";
         <div className="flex items-center gap-3 p-4 border-b border-border">
           <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-primary">
             <Image
-              src={post.user?.avatar || 'https://lyjriwcbkbzlabhzrcnl.supabase.co/storage/v1/object/public/supagram/profiles/descargar%20(2).jpg'}
-              alt={post.user?.username || 'default user'}
+              src={avatarUrl}
+              alt={username}
               fill
               className="object-cover"
             />
           </div>
           <div className="flex flex-col">
-            <span className="font-semibold text-foreground">{post.user?.username || 'default user'}</span>
-            <span className="text-xs text-foreground/50"><RelativeTime date={post.created_at} /></span>
+            <span className="font-semibold text-foreground">@{username}</span>
+            <span className="text-xs text-foreground/50">{getTimeAgo(new Date(post.created_at))}</span>
           </div>
         </div>
 
@@ -60,8 +67,9 @@ import { RelativeTime } from "./RelativeTime";
         <div className="relative w-full aspect-square">
           <Image
             src={post.image_url}
-            alt={`Post de ${post.user?.username || 'default user'}`}
+            alt={`Post de ${username}`}
             fill
+            unoptimized
             className="object-cover"
           />
         </div>
@@ -69,13 +77,13 @@ import { RelativeTime } from "./RelativeTime";
         {/* Likes y caption */}
         <div className="p-4">
           <div className="flex items-center gap-2">
-            <HeartIcon />
+            <HeartIcon filled={true} />
             <span className="text-lg font-bold text-foreground">
               {post.likes.toLocaleString()} likes
             </span>
           </div>
           <p className="mt-2 text-foreground">
-            <span className="font-semibold">{post.user?.username || 'default user'}</span>{" "}
+            <span className="font-semibold">{username}</span>{" "}
             <span className="text-foreground/80">{post.caption}</span>
           </p>
         </div>

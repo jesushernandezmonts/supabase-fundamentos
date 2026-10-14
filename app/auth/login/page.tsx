@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +25,11 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      setMessage({ type: "success", text: "¡Inicio de sesión exitoso!" });
+      setMessage({ type: "success", text: "¡Inicio de sesión exitoso! Redirigiendo..." });
+      setTimeout(() => {
+        router.push("/");
+        router.refresh();
+      }, 700);
     } catch (error) {
       setMessage({
         type: "error",
