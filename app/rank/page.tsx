@@ -60,7 +60,7 @@ export default function RankPage() {
         isLiked: false,
       }));
 
-      // Filtrar posts con likes y ordenar
+      // Filtrar posts con más de 5 likes y ordenar
       const filteredPosts = postsWithData
         .filter((p) => p.likes_count > 0)
         .sort((a, b) => b.likes_count - a.likes_count);
