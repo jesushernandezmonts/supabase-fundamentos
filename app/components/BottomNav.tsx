@@ -74,6 +74,14 @@ export default function BottomNav() {
         </Link>
 
         <Link
+          href="/post"
+          className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:scale-105 transition-transform"
+          aria-label="Crear post"
+        >
+          <PlusIcon />
+        </Link>
+
+        <Link
           href="/rank"
           className={`flex flex-col items-center gap-1 px-3 py-2 transition-colors ${
             pathname === "/rank" ? "text-primary" : "text-foreground/60 hover:text-foreground"
@@ -83,23 +91,6 @@ export default function BottomNav() {
           <span className="text-xs font-medium">Rank</span>
         </Link>
 
-        <Link
-          href="/post"
-          className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:scale-105 transition-transform"
-          aria-label="Crear post"
-        >
-          <PlusIcon />
-        </Link>
-
-        <Link
-          href="/profile"
-          className={`flex flex-col items-center gap-1 px-3 py-2 transition-colors ${
-            pathname.startsWith("/profile") ? "text-primary" : "text-foreground/60 hover:text-foreground"
-          }`}
-        >
-          <ProfileIcon active={pathname.startsWith("/profile")} />
-          <span className="text-xs font-medium">Perfil</span>
-        </Link>
       </div>
     </nav>
   );
